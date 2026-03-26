@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(c:\\\\python314\\\\python.exe -c \"import dotenv; print\\('installed'\\)\" 2>&1)",
+      "Bash(cmd /c \"c:\\\\python314\\\\python.exe -c \\\\\"import dotenv; print\\('installed'\\)\\\\\"\" 2>&1)",
+      "Bash(cmd /c \"c:\\\\python314\\\\python.exe -m pip install python-dotenv\" 2>&1)",
+      "Bash(cmd /c \"c:\\\\python314\\\\python.exe -m pip install python-dotenv 2>&1\")",
+      "Bash(cmd /c \"c:\\\\python314\\\\python.exe -m pip install python-dotenv\")",
+      "Bash(find /c/Users/sk15y/claude/py -name *.py -not -path */.venv/* -not -path */site-packages/*)",
+      "Bash(grep -rn \"subprocess.*claude\\\\|claude.*subprocess\\\\|claude -p\\\\|claude --print\" /c/Users/sk15y/claude/py/ --include=*.py)",
+      "Bash(claude --print --input-format stream-json --output-format stream-json --verbose)",
+      "Bash(python_cmd='import os,json,subprocess; env=os.environ.copy\\(\\); env.pop\\(\"\"ANTHROPIC_API_KEY\"\",None\\); msg={\"\"type\"\":\"\"user\"\",\"\"message\"\":{\"\"role\"\":\"\"user\"\",\"\"content\"\":[{\"\"type\"\":\"\"text\"\",\"\"text\"\":\"\"say hello briefly\"\"}]}}; r=subprocess.run\\([\"\"claude\"\",\"\"--print\"\",\"\"--input-format\"\",\"\"stream-json\"\",\"\"--output-format\"\",\"\"stream-json\"\",\"\"--verbose\"\"],input=json.dumps\\(msg\\),capture_output=True,text=True,timeout=30,env=env\\); print\\(\"\"RC:\"\",r.returncode\\); print\\(r.stdout[:500]\\); print\\(\"\"ERR:\"\",r.stderr[:200]\\)')",
+      "Bash(/c/Python/python.exe -c \"$python_cmd\")",
+      "Bash(find /c/Users/sk15y -name *.jpg -o -name *.jpeg -o -name *.png)",
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(/c/Python/python.exe -m pip freeze)",
+      "Bash(/c/Python/python.exe -c \"import flask; print\\('flask', flask.__version__\\); import werkzeug; print\\('werkzeug', werkzeug.__version__\\); import jinja2; print\\('jinja2', jinja2.__version__\\); import markupsafe; print\\('markupsafe', markupsafe.__version__\\)\")",
+      "Bash(/c/Python/python.exe -c \"\nimport importlib.metadata\nfor pkg in ['flask','werkzeug','jinja2','markupsafe','click','itsdangerous','python-dotenv','google-genai','gunicorn']:\n    try: print\\(f'{pkg}=={importlib.metadata.version\\(pkg\\)}'\\)\n    except: print\\(f'# {pkg} not found'\\)\n\")"
+    ]
+  }
+}

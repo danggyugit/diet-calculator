@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>분석 결과 - 식단 소모 계산기</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <!-- 네비게이션 -->
+  <nav class="navbar navbar-light bg-white shadow-sm">
+    <div class="container">
+      <span class="navbar-brand fw-bold">
+        <span class="me-2">🥗</span>식단 소모 계산기
+      </span>
+      <a href="/" class="btn btn-outline-secondary btn-sm">다시하기</a>
+    </div>
+  </nav>
+
+  <div class="container py-4" style="max-width: 720px;">
+
+    <!-- 분석 결과 요약 -->
+    <h2 class="fs-5 fw-bold mb-3">분석 결과</h2>
+    <div class="card mb-4 shadow-sm">
+      <div class="row g-0 align-items-center">
+        {% if image_b64 %}
+        <div class="col-auto">
+          <img src="data:{{ image_mime }};base64,{{ image_b64 }}"
+               alt="업로드 이미지"
+               class="rounded-start"
+               style="width:160px; height:130px; object-fit:cover;">
+        </div>
+        {% endif %}
+        <div class="col p-4">
+          <div class="total-calories fw-bold">
+            총 {{ "{:,}".format(total_calories) }} kcal
+          </div>
+          <p class="text-muted mb-0 mt-1">
+            {{ weight }}kg, {{ age }}세, {{ gender }} 기반 계산
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 음식 목록 (수량 조정) -->
+    <h2 class="fs-5 fw-bold mb-3">오늘 드신 음식 <span class="text-muted fs-6 fw-normal">(수량 조정 가능)</span></h2>
+
+    {% if foods %}
+    <form action="/recalculate" method="POST" id="recalcForm">
+      {% for food in foods %}
+      <div class="card mb-2 shadow-sm food-card" id="foodCard_{{ loop.index0 }}">
+        <div class="card-body py-3">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <span class="fw-semibold">{{ food.name }}</span>
+              <span class="text-muted small ms-2">{{ food.amount }} · {{ food.calories }}kcal/인분</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <!-- [-][수량][+] 버튼 -->
+              <div class="input-group input-group-sm qty-group">
+                <button type="button" class="btn btn-outline-secondary"
+                        onclick="changeQty({{ loop.index0 }}, -0.5)">-</button>
+                <input type="number"
+                       class="form-control text-center qty-input"
+                       name="quantity_{{ loop.index0 }}"
+                       id="qty_{{ loop.index0 }}"
+                       value="{{ food.get('quantity', 1.0) }}"
+                       min="0.5" max="10" step="0.5"
+                       style="width:60px;">
+                <button type="button" class="btn btn-outline-secondary"
+                        onclick="changeQty({{ loop.index0 }}, 0.5)">+</button>
+                <span class="input-group-text">인분</span>
+              </div>
+              <!-- 삭제 버튼 -->
+              <button type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      onclick="deleteFood({{ loop.index0 }})">✕</button>
+              <!-- 삭제 hidden input (삭제 시 활성화) -->
+              <input type="checkbox" name="delete_{{ loop.index0 }}"
+                     id="del_{{ loop.index0 }}" class="d-none">
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="d-grid mt-3 mb-4">
+        <button type="submit" class="btn btn-outline-primary">수량 재계산</button>
+      </div>
+    </form>
+    {% else %}
+    <div class="alert alert-warning">음식 정보가 없습니다.</div>
+    {% endif %}
+
+    <!-- 운동 추천 -->
+    <h2 class="fs-5 fw-bold mb-3">🔥 이 칼로리를 소모하려면? <span class="text-muted fs-6 fw-normal">(추천 운동)</span></h2>
+
+    <div class="row row-cols-1 row-cols-md-2 g-3 mb-5">
+      {% for ex in exercise_plan %}
+      <div class="col">
+        <div class="card h-100 shadow-sm exercise-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-2">
+              <span class="exercise-icon me-2">{{ ex.icon }}</span>
+              <span class="fw-semibold">{{ ex.name }}</span>
+              <span class="badge ms-auto
+                {% if ex.category == '유산소' %}bg-primary
+                {% elif ex.category == '근력' %}bg-warning text-dark
+                {% else %}bg-success{% endif %}">
+                {{ ex.category }}
+              </span>
+            </div>
+            <div class="rec-time">권장: <strong>{{ ex.rec_time }}분</strong></div>
+            <div class="min-time text-muted small">(최소 {{ ex.min_time }}분)</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function changeQty(idx, delta) {
+      const input = document.getElementById('qty_' + idx);
+      const newVal = Math.round((parseFloat(input.value) + delta) * 10) / 10;
+      if (newVal >= 0.5 && newVal <= 10) input.value = newVal;
+    }
+
+    function deleteFood(idx) {
+      // 카드 숨기기
+      document.getElementById('foodCard_' + idx).classList.add('d-none');
+      // delete hidden checkbox 체크 → 서버에서 삭제 처리
+      document.getElementById('del_' + idx).checked = true;
+      // 삭제 후 자동 재계산 폼 제출
+      document.getElementById('recalcForm').submit();
+    }
+  </script>
+</body>
+</html>

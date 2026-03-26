@@ -1,0 +1,63 @@
+/* ── 전체 ── */
+body {
+  font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+}
+
+/* ── 드롭존 ── */
+#dropZone {
+  border: 2px dashed #adb5bd;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+#dropZone:hover,
+#dropZone.drag-over {
+  border-color: #198754;
+  background-color: #f0fdf4;
+}
+
+/* ── 총 칼로리 ── */
+.total-calories {
+  font-size: 2rem;
+  color: #198754;
+}
+
+/* ── 음식 카드 ── */
+.food-card {
+  border-radius: 10px;
+  transition: box-shadow 0.15s;
+}
+.food-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+/* ── 수량 입력 그룹 ── */
+.qty-group .btn {
+  width: 32px;
+  padding: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.qty-input {
+  min-width: 52px;
+}
+
+/* ── 운동 카드 ── */
+.exercise-card {
+  border-radius: 10px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.exercise-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1) !important;
+}
+.exercise-icon {
+  font-size: 1.6rem;
+}
+.rec-time {
+  font-size: 1.1rem;
+  color: #198754;
+}
+.min-time {
+  font-size: 0.85rem;
+}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>식단 소모 계산기</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+  <!-- 네비게이션 -->
+  <nav class="navbar navbar-light bg-white shadow-sm">
+    <div class="container">
+      <span class="navbar-brand fw-bold">
+        <span class="me-2">🥗</span>식단 소모 계산기
+      </span>
+    </div>
+  </nav>
+
+  <div class="container py-5" style="max-width: 640px;">
+
+    <!-- 헤더 -->
+    <div class="text-center mb-4">
+      <h1 class="fs-3 fw-bold">오늘 드신 음식 사진을 올려주세요.</h1>
+      <p class="text-muted">AI가 칼로리를 계산하고 운동을 추천해 드립니다.</p>
+    </div>
+
+    <!-- 에러 메시지 -->
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <form action="/analyze" method="POST" enctype="multipart/form-data" id="analyzeForm">
+
+      <!-- 업로드 영역 -->
+      <div class="card border-2 mb-4" id="dropZone">
+        <div class="card-body text-center py-5" id="dropContent">
+          <div class="mb-3" id="dropIcon">
+            <span style="font-size: 3rem;">📷</span>
+          </div>
+          <p class="fw-semibold mb-1">클릭하거나 사진을 드래그하세요.</p>
+          <p class="text-muted small mb-3">JPG, PNG / Max 10MB</p>
+          <input type="file" name="food_image" id="fileInput" accept=".jpg,.jpeg,.png" class="d-none">
+          <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('fileInput').click()">
+            파일 선택
+          </button>
+          <p class="text-muted small mt-2 mb-0" id="fileName">선택된 파일 없음</p>
+        </div>
+        <!-- 미리보기 이미지 -->
+        <img id="previewImg" src="" alt="미리보기" class="d-none rounded" style="width:100%; max-height:300px; object-fit:cover;">
+      </div>
+
+      <!-- 신체 정보 입력 -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="fs-6 fw-bold mb-3">신체 정보 입력 <span class="text-muted fw-normal">(정확한 계산을 위해 필요)</span></h2>
+
+          <div class="row g-3 align-items-center mb-3">
+            <div class="col-auto">
+              <label class="form-label mb-0 fw-semibold">성별</label>
+            </div>
+            <div class="col-auto">
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="gender" id="male" value="남성" checked>
+                <label class="form-check-label" for="male">남</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="gender" id="female" value="여성">
+                <label class="form-check-label" for="female">여</label>
+              </div>
+            </div>
+            <div class="col">
+              <div class="input-group input-group-sm">
+                <input type="number" class="form-control" name="age" id="age"
+                       value="30" min="10" max="100" required>
+                <span class="input-group-text">세</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <input type="number" class="form-control" name="weight" id="weight"
+                   value="70" min="30" max="200" step="0.1" required>
+            <span class="input-group-text">kg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 제출 버튼 -->
+      <div class="d-grid">
+        <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+          <span id="btnText">분석하기</span>
+          <span id="btnSpinner" class="d-none">
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            AI가 식단을 분석 중입니다...
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const dropZone   = document.getElementById('dropZone');
+    const fileInput  = document.getElementById('fileInput');
+    const fileName   = document.getElementById('fileName');
+    const previewImg = document.getElementById('previewImg');
+    const dropIcon   = document.getElementById('dropIcon');
+    const dropContent = document.getElementById('dropContent');
+
+    function showPreview(file) {
+      if (!file) return;
+      fileName.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = e => {
+        previewImg.src = e.target.result;
+        previewImg.classList.remove('d-none');
+        dropContent.classList.add('d-none');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    fileInput.addEventListener('change', () => showPreview(fileInput.files[0]));
+
+    // 드래그앤드롭
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        showPreview(file);
+      }
+    });
+
+    // 드롭존 클릭 → 파일 선택
+    dropZone.addEventListener('click', e => {
+      if (e.target.tagName !== 'BUTTON') fileInput.click();
+    });
+
+    // 로딩 스피너
+    document.getElementById('analyzeForm').addEventListener('submit', function(e) {
+      if (!fileInput.files.length) {
+        e.preventDefault();
+        alert('사진을 먼저 업로드해주세요.');
+        return;
+      }
+      document.getElementById('btnText').classList.add('d-none');
+      document.getElementById('btnSpinner').classList.remove('d-none');
+      document.getElementById('submitBtn').disabled = true;
+    });
+  </script>
+</body>
+</html>
