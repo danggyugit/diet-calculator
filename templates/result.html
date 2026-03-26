@@ -40,6 +40,9 @@
           <p class="text-muted mb-0 mt-1">
             {{ weight }}kg, {{ age }}세, {{ gender }} 기반 계산
           </p>
+          <p class="text-muted small mb-0 mt-1">
+            기초대사량(BMR): <strong>{{ "{:,}".format(bmr) }} kcal/일</strong>
+          </p>
         </div>
       </div>
     </div>
@@ -56,6 +59,11 @@
             <div>
               <span class="fw-semibold">{{ food.name }}</span>
               <span class="text-muted small ms-2">{{ food.amount }} · {{ food.calories }}kcal/인분</span>
+              <div class="mt-1">
+                {% if food.carbs is defined %}<span class="badge bg-warning text-dark me-1 fw-normal">탄 {{ food.carbs }}g</span>{% endif %}
+                {% if food.protein is defined %}<span class="badge bg-danger me-1 fw-normal">단 {{ food.protein }}g</span>{% endif %}
+                {% if food.fat is defined %}<span class="badge bg-secondary fw-normal">지 {{ food.fat }}g</span>{% endif %}
+              </div>
             </div>
             <div class="d-flex align-items-center gap-2">
               <!-- [-][수량][+] 버튼 -->
@@ -113,7 +121,7 @@
               </span>
             </div>
             <div class="rec-time">권장: <strong>{{ ex.rec_time }}분</strong></div>
-            <div class="min-time text-muted small">(최소 {{ ex.min_time }}분)</div>
+            <div class="text-muted small">{{ ex.kcal_per_min }} kcal/분</div>
           </div>
         </div>
       </div>

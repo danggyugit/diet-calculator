@@ -33,7 +33,6 @@ def calc_exercise_plan(total_calories: float, weight: float, age: int, gender: s
     """
     총 칼로리를 소모하기 위한 운동별 필요 시간 계산
     - MET × 체중(kg) / 60 = kcal/min
-    - 최소 시간: 필요 시간의 80% (5분 단위 올림)
     - 권장 시간: 필요 시간 100% (5분 단위 올림)
     """
     plan = []
@@ -41,10 +40,10 @@ def calc_exercise_plan(total_calories: float, weight: float, age: int, gender: s
         kcal_per_min = ex["met"] * weight / 60
         required_min = total_calories / kcal_per_min
         plan.append({
-            "name":     ex["name"],
-            "category": ex["category"],
-            "icon":     ex["icon"],
-            "min_time": _round_up_5(required_min * 0.8),
-            "rec_time": _round_up_5(required_min),
+            "name":         ex["name"],
+            "category":     ex["category"],
+            "icon":         ex["icon"],
+            "rec_time":     _round_up_5(required_min),
+            "kcal_per_min": round(kcal_per_min, 1),
         })
     return plan

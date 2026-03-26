@@ -15,10 +15,12 @@ PROMPT = """다음 음식 사진을 분석하여 JSON만 반환하세요. 다른
 반환 형식:
 {
   "foods": [
-    {"name": "음식명", "amount": "추정량(예: 1인분, 200g)", "calories": 숫자, "quantity": 1.0}
+    {"name": "음식명", "amount": "추정량(예: 1인분, 200g)", "calories": 숫자, "carbs": 숫자, "protein": 숫자, "fat": 숫자, "quantity": 1.0}
   ],
   "total_calories": 숫자
 }
+
+carbs(탄수화물), protein(단백질), fat(지방)은 그램(g) 단위 정수로 추정하세요.
 
 음식을 인식할 수 없으면:
 {"foods": [], "total_calories": 0, "error": "음식을 인식할 수 없습니다"}"""

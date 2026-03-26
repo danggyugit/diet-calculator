@@ -9,7 +9,7 @@ from flask import Flask, render_template, request, redirect, url_for, session
 load_dotenv(Path(__file__).parent / ".env", override=True)
 
 from gemini_service import analyze_food_image
-from calorie_service import calc_exercise_plan
+from calorie_service import calc_exercise_plan, calc_bmr
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "diet-calculator-secret-2026")
@@ -116,11 +116,13 @@ def result():
         session["age"],
         session["gender"],
     )
+    bmr = round(calc_bmr(session["weight"], session["age"], session["gender"]))
     image_b64, image_mime = _get_image_b64(session.get("image_key"))
     return render_template("result.html",
                            foods=session["foods"],
                            total_calories=session["total_calories"],
                            exercise_plan=exercise_plan,
+                           bmr=bmr,
                            weight=session["weight"],
                            age=session["age"],
                            gender=session["gender"],
@@ -162,10 +164,12 @@ def recalculate():
 
     image_b64, image_mime = _get_image_b64(session.get("image_key"))
     exercise_plan = calc_exercise_plan(total_calories, weight, age, gender)
+    bmr = round(calc_bmr(weight, age, gender))
     return render_template("result.html",
                            foods=foods,
                            total_calories=total_calories,
                            exercise_plan=exercise_plan,
+                           bmr=bmr,
                            weight=weight,
                            age=age,
                            gender=gender,
